@@ -1,0 +1,92 @@
+---
+title: "Activitat 4"
+author: "Marc Cervera Rosell"
+date: "21-06-2024"
+output: pdf_document
+---
+
+```{r}
+setRepositories(ind=2) # Per descarregar paquets de CRAN
+```
+
+# 1 Preprocessament
+
+## 1.1 Variables Income i Year_Birth
+
+```{r}
+tryCatch({
+  data <- read.csv("marketing.csv", header = TRUE)
+  print("Fitxer llegit correctament")
+}, error = function(e){
+  cat("ERROR en la lectura del fitxer:",conditionMessage(e),"\n")
+})
+```
+
+```{r}
+columns <- names(data)
+type <- sapply(data, class)
+for (i in seq_along(columns)) {
+  cat("La columna", columns[i], "és de tipus", type[i], "\n")
+}
+```
+
+Després d'observar els tipus de les variables del conjunt de dades, solament es procedirà a fer un canvi de tipus. Aquest canvi es produirà en la variable _Dt_Customer_ que passarà de ser de tipus _character_ a tipus _date_.
+
+```{r}
+data_transformed <- transform(data,
+                              Dt_Customer = as.Date(Dt_Customer))
+```
+
+```{r}
+columns <- names(data_transformed)
+type <- sapply(data_transformed, class)
+for (i in seq_along(columns)) {
+  cat("La columna", columns[i], "és de tipus", type[i], "\n")
+}
+```
+
+S'observa que després de l'aplicació de la funció _transform()_ el tipus de la variable _Dt_Customer_ queda modificat.
+
+Finalment, cal excloure les variables _Z_CostContact_ i _Z_Revenue_, atès que són variables de control i que així s'indica a l'enunciat de l'activitat.
+
+```{r}
+columns_to_exclude <- c("Z_CostContact", "Z_Revenue")
+data_with_no_control_variables <- data_transformed[, !(names(data_transformed) %in%
+                                                         columns_to_exclude)]
+print(names(data_with_no_control_variables))
+```
+
+S'observa que en treure per pantalla les columnes del _dataset_ _data_with_no_control_variables_ les variables de control indicades anteriorment ja no hi són. Per tant, aquest conjunt final queda completament operatiu per a poder treballar.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
