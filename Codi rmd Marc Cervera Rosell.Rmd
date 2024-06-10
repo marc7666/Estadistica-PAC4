@@ -1,0 +1,155 @@
+---
+title: "Activitat 4"
+author: "Marc Cervera Rosell"
+date: "21-06-2024"
+output: pdf_document
+---
+
+```{r}
+setRepositories(ind=2) # Per descarregar paquets de CRAN
+```
+
+# 1 Preprocessament
+
+## 1.1 Variables Income i Year_Birth
+
+```{r}
+tryCatch({
+  data <- read.csv("marketing.csv", header = TRUE)
+  print("Fitxer llegit correctament")
+}, error = function(e){
+  cat("ERROR en la lectura del fitxer:",conditionMessage(e),"\n")
+})
+```
+
+```{r}
+columns <- names(data)
+type <- sapply(data, class)
+for (i in seq_along(columns)) {
+  cat("La columna", columns[i], "és de tipus", type[i], "\n")
+}
+```
+
+Després d'observar els tipus de les variables del conjunt de dades, solament es procedirà a fer un canvi de tipus. Aquest canvi es produirà en la variable _Dt_Customer_ que passarà de ser de tipus _character_ a tipus _date_.
+
+```{r}
+data_transformed <- transform(data,
+                              Dt_Customer = as.Date(Dt_Customer))
+```
+
+```{r}
+columns <- names(data_transformed)
+type <- sapply(data_transformed, class)
+for (i in seq_along(columns)) {
+  cat("La columna", columns[i], "és de tipus", type[i], "\n")
+}
+```
+
+S'observa que després de l'aplicació de la funció _transform()_ el tipus de la variable _Dt_Customer_ queda modificat.
+
+Finalment, cal excloure les variables _Z_CostContact_ i _Z_Revenue_, atès que són variables de control i que així s'indica a l'enunciat de l'activitat.
+
+```{r}
+columns_to_exclude <- c("Z_CostContact", "Z_Revenue")
+data_with_no_control_variables <- data_transformed[, !(names(data_transformed) %in%
+                                                         columns_to_exclude)]
+print(names(data_with_no_control_variables))
+```
+
+S'observa que en treure per pantalla les columnes del _dataset_ _data_with_no_control_variables_ les variables de control indicades anteriorment ja no hi són. Per tant, aquest conjunt final queda completament operatiu per a poder treballar.
+
+## 1.2 Valors absents
+
+Abans de res, encara que l'enunciat ja ho diu, és bona pràctica comprovar si realment hi ha valors absents.
+
+```{r}
+any(is.na(data_with_no_control_variables$Income))
+any(is.na(data_with_no_control_variables$Year_Birth))
+```
+```{r}
+library(VIM)
+```
+
+Primer cal seleccionar aquelles variables que s'usaran per al càlcul de la distància de Gower. Com s'especifica en l'enunciat seran les variables 10 a 15.
+
+```{r}
+variables_gower <- c("MntWines", "MntFruits", "MntMeatProducts", "MntFishProducts",
+                     "MntSweetProducts", "MntGoldProds")
+```
+
+Com s'indica en les instruccions de l'activitat en desenvolupament, per imputar els valors _NA_ de la varible _Income_ s'aplica la funció _kNN_ de la llibreria _VIM_.
+
+```{r}
+income_imputed <- kNN(data_with_no_control_variables, variable = "Income",
+                      dist_var = variables_gower, k = 5)
+```
+
+Un cop aplicada la funció _kNN_ s'observa que la variable _Income_ ja no té valors _NA_
+
+```{r}
+any(is.na(income_imputed$Income))
+```
+
+En primer lloc, abans de calcular la mitjana d'edat cal seleccionar les persones que són vídues.
+
+```{r}
+widowed_people <- subset(income_imputed, Marital_Status == "Widow")
+```
+
+Un cop seleccionades aquestes persones ja es pot procedir al càlcul de la mitjana d'edat.
+
+```{r}
+mean_widow_age <- mean(widowed_people$Year_Birth)
+cat("L'edat mitjana de les persones vidues és:", round(mean_widow_age))
+```
+
+```{r}
+income_imputed$Year_Birth <- ifelse(is.na(income_imputed$Year_Birth), mean_widow_age,
+                                    income_imputed$Year_Birth)
+```
+
+```{r}
+any(is.na(income_imputed$Year_Birth))
+```
+
+S'observa que després de l'execució de la cel·la que conté la sentència _ifelse_ els valors _NA_ de la variable _Year_Birth_ ja no són tals.
+
+```{r}
+any(is.na(income_imputed))
+```
+
+Un cop eliminats els valors _NA_ de les variables _Income_ i _Year_Birth_ es pot observar (en la cel·la anterior) el conjunt de dades queda completament lliure de valors _NA_, per tant, cal redenominar aquest conjunt a _markclean_.
+
+```{r}
+markclean <- income_imputed
+```
+
+Finalment, es demana una reflexió sobre el nombre de valors _NA_ del fitxer, per tant, cal, en primer lloc, comptar aquests valors.
+
+```{r}
+na_per_column <- colSums(is.na(data_with_no_control_variables))
+total_na_values <- sum(na_per_column)
+cat("El nombre total de valors NA és:", total_na_values)
+```
+
+Tot i que el nombre de valors _NA_ del fitxer no és considerablement elevat, és important abordar aquests valors. El fet de l'existència de valors _NA_ pot ser un indicador de problemes en les dades com: problemes en el moment de la recollida de les dades o senzillament que en el moment d'introduir les dades en el fitxer s'ha comès error humà. Com s'acaba d'esmentar, malgrat que el nombre de valors absents no és molt significatiu, és molt important gestionar aquests buits per evitar problemes en les anàlisis que es puguin arribar a fer tant en aquesta activitat com les anàlisis que pugui fer una altra persona completament aliena a la UOC.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
