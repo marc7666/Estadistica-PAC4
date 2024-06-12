@@ -26,7 +26,7 @@ tryCatch({
 columns <- names(data)
 type <- sapply(data, class)
 for (i in seq_along(columns)) {
-  cat("La columna", columns[i], "és de tipus", type[i], "\n")
+  cat("La columna", columns[i], "es de tipus", type[i], "\n")
 }
 ```
 
@@ -41,7 +41,7 @@ data_transformed <- transform(data,
 columns <- names(data_transformed)
 type <- sapply(data_transformed, class)
 for (i in seq_along(columns)) {
-  cat("La columna", columns[i], "és de tipus", type[i], "\n")
+  cat("La columna", columns[i], "es de tipus", type[i], "\n")
 }
 ```
 
@@ -100,7 +100,7 @@ Un cop seleccionades aquestes persones ja es pot procedir al càlcul de la mitja
 
 ```{r}
 mean_widow_age <- mean(widowed_people$Year_Birth)
-cat("L'edat mitjana de les persones vidues és:", round(mean_widow_age))
+cat("L'edat mitjana de les persones vidues es:", round(mean_widow_age))
 ```
 
 ```{r}
@@ -129,7 +129,7 @@ Finalment, es demana una reflexió sobre el nombre de valors _NA_ del fitxer, pe
 ```{r}
 na_per_column <- colSums(is.na(data_with_no_control_variables))
 total_na_values <- sum(na_per_column)
-cat("El nombre total de valors NA és:", total_na_values)
+cat("El nombre total de valors NA es:", total_na_values)
 ```
 
 Tot i que el nombre de valors _NA_ del fitxer no és considerablement elevat, és important abordar aquests valors. El fet de l'existència de valors _NA_ pot ser un indicador de problemes en les dades com: problemes en el moment de la recollida de les dades o senzillament que en el moment d'introduir les dades en el fitxer s'ha comès error humà. Com s'acaba d'esmentar, malgrat que el nombre de valors absents no és molt significatiu, és molt important gestionar aquests buits per evitar problemes en les anàlisis que es puguin arribar a fer tant en aquesta activitat com les anàlisis que pugui fer una altra persona completament aliena a la UOC.
@@ -142,7 +142,7 @@ Tot i que el nombre de valors _NA_ del fitxer no és considerablement elevat, é
 mean_abs <- abs(mean(markclean$Income))
 standard_deviation <- sd(markclean$Income)
 coeffitient_of_variation <- standard_deviation / mean_abs
-cat("El coeficient de variació de la variable Income és:", coeffitient_of_variation)
+cat("El coeficient de variacio de la variable Income es:", coeffitient_of_variation)
 ```
 
 Es pot observar un coeficient de variació de 0.4824468. Això indica que, efectivament, existeix una variabilitat en la distribució, però que no és excessiva. Per tant, l'ingrés mitjà sí que és un valor representatiu de la distribució dels ingressos.
