@@ -134,6 +134,77 @@ cat("El nombre total de valors NA és:", total_na_values)
 
 Tot i que el nombre de valors _NA_ del fitxer no és considerablement elevat, és important abordar aquests valors. El fet de l'existència de valors _NA_ pot ser un indicador de problemes en les dades com: problemes en el moment de la recollida de les dades o senzillament que en el moment d'introduir les dades en el fitxer s'ha comès error humà. Com s'acaba d'esmentar, malgrat que el nombre de valors absents no és molt significatiu, és molt important gestionar aquests buits per evitar problemes en les anàlisis que es puguin arribar a fer tant en aquesta activitat com les anàlisis que pugui fer una altra persona completament aliena a la UOC.
 
+# 2 Estadística descriptiva
+
+## 2.1 Income
+
+```{r}
+mean_abs <- abs(mean(markclean$Income))
+standard_deviation <- sd(markclean$Income)
+coeffitient_of_variation <- standard_deviation / mean_abs
+cat("El coeficient de variació de la variable Income és:", coeffitient_of_variation)
+```
+
+Es pot observar un coeficient de variació de 0.4824468. Això indica que, efectivament, existeix una variabilitat en la distribució, però que no és excessiva. Per tant, l'ingrés mitjà sí que és un valor representatiu de la distribució dels ingressos.
+
+Per respondre a la segona pregunta cal, prèviament, utilitzar alguna eina per visualitzar la distribució de les dades de la variable. En aquest cas s'ha escollit veure la distribució en un gràfic de densitat. També s'introduirà una campana de Gauss (densitat normal) de les dades d'estudi per veure com de lluny estan de distribuir-se de manera normal.
+
+```{r}
+plot(density(markclean$Income),
+     main = "Distribucio de la variable Income",
+     xlab = "Valors",
+     ylab = "Densitat",
+     col = "blue",
+     lwd = 2)
+values_normal_distribution <- seq(min(markclean$Income), max(markclean$Income),
+                                  length = 100)
+normal_distribution <- dnorm(values_normal_distribution, mean = mean_abs,
+                             sd = standard_deviation) # Campana de Gauss de les dades
+lines(values_normal_distribution, normal_distribution, col = "red", lwd = 2)
+```
+
+Després d'observar ambdós gràfics, es pot observar que les dades no normalitzades (línia blava) no segueixen una distribució normal atès que la forma de la corba en el gràfic de densitat queda molt allunyada de la forma de la línia vermella que representa les dades normalitzades.
+
+## 2.2 Education
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(magrittr) # Per l'operador %>%
+```
+
+L'operador "%>%" és un operador que crea un _pipe_ i permet que el resultat d'una funció passi com a primer argument de la següent funció.
+
+```{r}
+markclean %>%
+  group_by(Education) %>%
+  summarize(
+    mean_value = mean(Income),
+    observations = n(),
+    deviation = sd(Income)
+  ) %>%
+  arrange(desc(Education))
+```
+
+```{r}
+markclean %>%
+  arrange(desc(Education)) %>%
+  ggplot(aes(x = Education, y = Income)) +
+  geom_boxplot() + 
+  labs(x = "Education", y = "Income", tittle = "Ingressos segons nivell educatiu")
+```
+
+En primer lloc, es pot observar que la posició de la mediana (línia interna de la caixa), es troba just al centre en els nivells educatius "Graduation", "Master" i "PhD", per tant, en aquests tres casos es pot concloure que el 50% dels valors estan per sota de la mediana i l'altre 50% per sobre. Per als nivells educatius "2n Cycle" i "Basic", es pot observar que en el cas del primer nivell educatiu comentat, la línia de la mediana es troba lleugerament desplaçada a la part superior de la caixa i en el cas del nivell "Basic" la línia de la mediana està a la part superior de la caixa, per tant, en aquests dos casos les dades presenten una asimetria positiva cosa que indica que la majoria de les dades es troben a l'esquerra de la mediana. El fet de tenir una asimetria positiva és indicatiu, en aquest cas, que una petita proporció de persones tenen més ingressos que la majoria de les persones del mateix nivell educatiu.
+
+Observant els bigotis de les caixes, es pot veure que n'hi ha de més curt i de més llargs. Segons la longitud dels bigotis de cada caixa, es podrà veure com d'agrupades estan les dades, és a dir, es podrà observar com són de dispersos els valors extrems. Per interpretar els bigotis de les caixes cal mirar la seva longitud. Com més llargs siguin els bigotis més dispersos estaran els valors extrems, és a dir, els valors extrems estaran més lluny de la resta de valors. Per contra, com més curts siguin els bigotis de les caixes, menys dispersos estaran els valors extrems i, per tant, més propers estaran a la resta de valors.
+
+Finalment, s'observa la presència de valors atípics. Els valors atípics són els punts que estan situats fora dels bigotis, però això no significa que no siguin valors importants.
+
+
+
+
+
+
 
 
 
