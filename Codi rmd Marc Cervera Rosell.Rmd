@@ -199,28 +199,3 @@ En primer lloc, es pot observar que la posició de la mediana (línia interna de
 Observant els bigotis de les caixes, es pot veure que n'hi ha de més curt i de més llargs. Segons la longitud dels bigotis de cada caixa, es podrà veure com d'agrupades estan les dades, és a dir, es podrà observar com són de dispersos els valors extrems. Per interpretar els bigotis de les caixes cal mirar la seva longitud. Com més llargs siguin els bigotis més dispersos estaran els valors extrems, és a dir, els valors extrems estaran més lluny de la resta de valors. Per contra, com més curts siguin els bigotis de les caixes, menys dispersos estaran els valors extrems i, per tant, més propers estaran a la resta de valors.
 
 Finalment, s'observa la presència de valors atípics. Els valors atípics són els punts que estan situats fora dels bigotis, però això no significa que no siguin valors importants.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
