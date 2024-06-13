@@ -100,7 +100,8 @@ Un cop seleccionades aquestes persones ja es pot procedir al càlcul de la mitja
 
 ```{r}
 mean_widow_age <- mean(widowed_people$Year_Birth)
-cat("L'edat mitjana de les persones vidues es:", round(mean_widow_age))
+cat("L'any de naixement mitjà de les persones vidues es:"
+    , round(mean_widow_age))
 ```
 
 ```{r}
@@ -199,3 +200,80 @@ En primer lloc, es pot observar que la posició de la mediana (línia interna de
 Observant els bigotis de les caixes, es pot veure que n'hi ha de més curt i de més llargs. Segons la longitud dels bigotis de cada caixa, es podrà veure com d'agrupades estan les dades, és a dir, es podrà observar com són de dispersos els valors extrems. Per interpretar els bigotis de les caixes cal mirar la seva longitud. Com més llargs siguin els bigotis més dispersos estaran els valors extrems, és a dir, els valors extrems estaran més lluny de la resta de valors. Per contra, com més curts siguin els bigotis de les caixes, menys dispersos estaran els valors extrems i, per tant, més propers estaran a la resta de valors.
 
 Finalment, s'observa la presència de valors atípics. Els valors atípics són els punts que estan situats fora dels bigotis, però això no significa que no siguin valors importants.
+
+# 3. Estadística inferencial
+
+## 3.1 Contrast d'hipòtesi per a la diferència de les mitjanes
+
+### 3.1.1 Escriviu la hipòtesi nul·la i l'alternativa
+
+Hipòtesi nul·la: Els ingressos mitjans de les persones sense estudis universitaris són iguals als de les persones amb estudis universitaris.
+
+Hipòtesi alternativa: Els ingressos mitjans de les persones sense estudis són inferiors als de les persones amb estudis universitaris.
+
+### 3.1.2 Justificació del test a aplicar
+
+Per a poder aplicar un test de diferència de mitjanes, és condició necessària que les mostres a examinar siguin independents.
+
+Per comprovar la igualtat, o diferència, de les variàncies s'aplicarà un test de Fisher.
+
+Hipòtesi nul·la: Les variàncies són iguals.
+
+Hipòtesi nul·la: Les variàncies són diferents.
+
+```{r}
+alpha <- 0.01
+# Ingressos no universitaris
+income_no_uni <- markclean$Income[markclean$Education %in% c("2n Cycle", "Basic")] 
+# Ingressos universitaris
+income_uni <- markclean$Income[markclean$Education %in% c("Graduation", 
+                                                          "Master", "PhD")] 
+mean_no_uni <- mean(income_no_uni)
+mean_uni <- mean(income_uni)
+n_no_uni <- length(income_no_uni)
+n_uni <- length(income_uni)
+s_no_uni <- sd(income_no_uni)
+s_uni <- sd(income_uni)
+c(mean_no_uni, mean_uni, s_no_uni, s_uni, n_no_uni, n_uni)
+```
+
+```{r}
+fobs <- s_no_uni^2 / s_uni^2
+fcritL <- qf(alpha/2, df1 = n_no_uni - 1, df2 = n_uni - 2)
+fcritU <- qf(1 - alpha/2, df1 = n_no_uni - 1, df2 = n_uni - 2)
+pvalue <- min(pf(fobs, df1 = n_no_uni - 1, df2 = n_uni - 2, lower.tail = FALSE),
+              pf(fobs, df1 = n_no_uni - 1, df2 = n_uni - 2)) * 2
+c(fobs, fcritL, fcritU, pvalue)
+```
+
+Atès que el valor observat es troba dins dels límits L i U i que el valor P és major al valor alfa es pot concloure que no hi ha evidència suficient per a rebutjar la hipòtesi nul·la i que amb un 99% de confiança les variàncies d'ambdues poblacions són iguals.
+
+### 3.1.3 Càlculs
+
+```{r}
+combined_s <- sqrt((((n_no_uni - 1) * s_no_uni^2) + ((n_uni - 1) * s_uni^2))/
+                     (n_no_uni + n_uni - 2))
+t_obs <- (mean_no_uni - mean_uni) / (combined_s * sqrt((1 / n_no_uni) + (1 / n_uni)))
+tcritL <- qt(alpha / 2, n_no_uni + n_uni - 2)
+tcritU <- qt(1 - alpha / 2, n_no_uni + n_uni - 2)
+pvalue_test <- pt(abs(t_obs), df = n_no_uni + n_uni - 2, lower.tail = FALSE) * 2
+c(t_obs, tcritL, tcritU, pvalue_test)
+```
+
+### 3.1.4 Interpretació del test
+
+Vist que el valor observat (t_obs) es troba fora del rang de valors crítics i que el valor p (pvalue_test) és inferior al valor alfa (0.01) es rebutja la hipòtesi nul·la. Per tant, es pot afirmar que amb un 99% de confiança els ingressos mitjans de les persones sense estudis són inferiors als de les persones amb estudis universitaris.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
