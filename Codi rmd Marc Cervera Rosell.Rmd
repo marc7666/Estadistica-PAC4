@@ -264,12 +264,166 @@ c(t_obs, tcritL, tcritU, pvalue_test)
 
 Vist que el valor observat (t_obs) es troba fora del rang de valors crítics i que el valor p (pvalue_test) és inferior al valor alfa (0.01) es rebutja la hipòtesi nul·la. Per tant, es pot afirmar que amb un 99% de confiança els ingressos mitjans de les persones sense estudis són inferiors als de les persones amb estudis universitaris.
 
+# 4. Model de regressió
+
+## 4.1 Regressió lineal múltiple
+
+```{r}
+markclean_bkp <- markclean
+# Backup del dataset
+```
+
+```{r}
+markclean$Education <- factor(markclean$Education,
+                            levels = c("Basic","2n Cycle","Graduation", "Master", "PhD"))
+
+set.seed(123)
+training_index <- sample(seq_len(nrow(markclean)),
+                         size = 0.8 * nrow(markclean))
+set_training <- markclean[training_index,]
+set_ttesting <- markclean[-training_index,]
+
+model <- lm(Income ~ Year_Birth + Kidhome + Teenhome + Education + MntWines + MntFruits +
+              MntMeatProducts + MntFishProducts + MntSweetProducts + MntGoldProds +
+              NumDealsPurchases + NumCatalogPurchases + NumStorePurchases +
+              NumWebVisitsMonth, data = set_training)
+summary_model <- summary(model)
+cat("Valor R-squared = ",summary_model$r.squared, "\n")
+cat("Valor R-sqaured ajustat = ",summary_model$adj.r.squared)
+```
+
+```{r}
+predictions <- predict(model, newdata = set_ttesting)
+sum_for_RMSE <- 0
+for (i in 1:length(predictions)) {
+  sum_for_RMSE <- sum_for_RMSE + ((set_ttesting$Income[i] - predictions[[i]])^2)
+}
+rmse <- sqrt(sum_for_RMSE / nrow(set_ttesting))
+cat("RMSE = ",rmse)
+```
+
+Per comprovar la qualitat de l'ajust, s'observaran i interpretaran tres valors que atorga el _summary_ del model. El primer valor és el _Multiple R-squared_. Aquest valor és de 0.5112 (51.12%), això indica que les variables incloses en el model poden explicar fins al 51.12% de les variacions dels ingressos. El fet que aquest valor superi el 50% és indicatiu de què el model és relativament bo. Per considerar el model bo i no relativament bo, caldria que aquest valor superés el 70%.
+
+El segon valor a interpretar és el _Adjusted R-squared_. Aquest valor és una versió modificada de l'anterior que ha estat ajustat al nombre de predictors del model. Aquest valor és de 0.5065 (50.65%), per tant, el model encara pot explicar el 50.65% de les variacions dels ingressos. Vist que continua superant el 50%, es pot concloure que l'ajust continua sent relativament bo.
+
+Finalment, l'últim valor a considerar per la qualitat de l'ajust és el _Residual standard error_ (RSE). Aquest valor indica la dispersió dels punts al voltant de la línia del millor ajustament.
+
+Com el RMSE està calculat en els ingressos (variable depenent), es pot interpretar el resultat del RMSE comparant amb el valor mitjà dels ingressos.
+
+```{r}
+mean_income <- mean(markclean$Income)
+cat("Ingressos mitjans:", mean_income)
+```
+S'observa que el RMSE és bastant menor que els ingressos mitjans. En vista d'aquest fet, es conclou que el model realitza relativament bé les prediccions.
+
+### 4.1.1 Multicolinealitat
+
+```{r}
+library(car)
+```
 
 
+```{r}
+vif_vals <- vif(model)
+```
 
+```{r}
+print(vif_vals)
+```
 
+Després d'observar els resultats de la funció _vif()_ és pot observar que la multicol·linealitat del model no és un problema (no significa que no hi hagi multicol·linealitat) atès que cap valor GVIF és superior a 5. Pel que fa als resultats de la tercera columna, els valors tampoc són alarmants tot i que cal estar atent.
 
+## 4.2 Regressió logística
 
+### 4.2.1 Model predictiu
+
+```{r}
+markclean <- markclean_bkp
+# Desfeta del factor a la columna Education
+```
+
+```{r}
+set.seed(123)
+training_index_log <- sample(seq_len(nrow(markclean)),
+                         size = 0.8 * nrow(markclean))
+set_training_log <- markclean[training_index,]
+set_testing_log <- markclean[-training_index,]
+model_log <- glm(Response ~ NumDealsPurchases + NumWebVisitsMonth + AcceptedCmp1 + 
+                   AcceptedCmp2 + AcceptedCmp3 + AcceptedCmp4 + AcceptedCmp5,
+                 data = set_training_log, family = binomial)
+summary(model_log)
+```
+
+Per saber quines variables són significatives cal, primer de tot, establir un nivell sé significança de referència. Per tal de continuar treballant amb valors anteriorment vists en aquesta PAC es considerarà un nivell de significança de 0.01. Per tant, amb aquest valor establert es pot afirmar que totes aquelles variables que tinguin un valor p associat major a 0.01 no seran significatives. En conseqüència, en el cas del _summary_ del model de regressió logística que es presenta en l'anterior cel·la, les variables significatives seran aquelles que tinguin dos o tres asteriscs, on dos asteriscs és sinònim de "variable significativa" (p < 0.01) i tres asteriscs és senyal de "variable molt significativa" (p < 0.001). Un cop donada aquesta explicació, s'observa que totes les variables menys _NumWebVisitsMonth_ i _AcceptedCmp2_ són significatives.
+
+Pel que fa a la qualitat del model, es pot observar que la null deviance és menor a la residual deviance i això és indicatiu que les variables significatives contribueixen a millorar les prediccions del model amb variables si es compara amb un model sense variables.
+
+### 4.2.2 Matriu de confusió
+
+```{r}
+predictions_log <- predict(model_log, newdata = set_testing_log, type = "response")
+converted_predictions <- ifelse(predictions_log >= 0.5, 1, 0)
+```
+
+```{r}
+chooseCRANmirror(ind = 1)
+install.packages("caret")
+```
+
+S'ha col·lapsat el _output_ de la cel·la anterior atesa la gran quantitat de _logs_ que s'han generat, però es pot observar en la següent cel·la que el paquet s'ha instal·lat i importat correctament.
+
+```{r}
+library(caret)
+```
+
+```{r}
+confusion_matrix <- confusionMatrix(data = factor(converted_predictions,
+                                                  levels = c(0, 1)),
+                                    reference = factor(set_testing_log$Response, levels
+                                                       = c(0, 1)))
+print(confusion_matrix)
+```
+
+Interpretació de la matriu de confusió:
+
+- Quadrant superior esquerra -> Vertaders positius -> Valor predit = valor real = 0
+
+- Quadrant superior dret -> Falsos negatius -> Valor predit = 0 i valor real = 1
+
+- Quadrant inferior esquerra -> Falsos positius -> Valor predit = 1 i valor real = 0
+
+- Quadrant inferior dret -> Vertaders positius -> Valor predit = valor real = 1
+
+S'observa que hi ha una quantitat substancialment superior de valors ben predits que de valors mal predits i això és indicatiu de què el model funciona bé.
+
+### 4.2.3 Predicció
+
+```{r}
+model_coefs <- coef(model_log)
+print(model_coefs)
+```
+
+```{r}
+data_calc_prediction <- data.frame(model_coefs[1] + 
+                                    model_coefs[2] * 5 +
+                                    model_coefs[3] * 10 +
+                                    model_coefs[4] + 
+                                    model_coefs[5] + 
+                                    model_coefs[6] + 
+                                    model_coefs[7] + 
+                                    model_coefs[8])
+prob_pred <- 1 / (1 + exp(-data_calc_prediction))
+cat("Predicció amb càlculs manuals: "
+,prob_pred$model_coefs.1....model_coefs.2....5...model_coefs.3....10...model_coefs.4....)
+```
+
+```{r}
+new_data <- data.frame(NumDealsPurchases = 5, NumWebVisitsMonth = 10,
+                       AcceptedCmp1 = 1, AcceptedCmp2 = 1, AcceptedCmp3 = 1,
+                       AcceptedCmp4 = 1, AcceptedCmp5 = 1)
+probability_predict <- predict(model_log, newdata = new_data, type = "response")
+cat("Probabilitat amb predict():",probability_predict)
+```
 
 
 
