@@ -264,6 +264,63 @@ c(t_obs, tcritL, tcritU, pvalue_test)
 
 Vist que el valor observat (t_obs) es troba fora del rang de valors crítics i que el valor p (pvalue_test) és inferior al valor alfa (0.01) es rebutja la hipòtesi nul·la. Per tant, es pot afirmar que amb un 99% de confiança els ingressos mitjans de les persones sense estudis són inferiors als de les persones amb estudis universitaris.
 
+# 4. Model de regressió
+
+## 4.1 Regressió lineal múltiple
+
+```{r}
+markclean$Education <- factor(markclean$Education,
+                            levels = c("Basic","2n Cycle","Graduation", "Master", "PhD"))
+model <- lm(Income ~ Year_Birth + Kidhome + Teenhome + Education + MntWines + MntFruits +
+              MntMeatProducts + MntFishProducts + MntSweetProducts + MntGoldProds +
+              NumDealsPurchases + NumCatalogPurchases + NumStorePurchases +
+              NumWebVisitsMonth, data = markclean)
+summary_model <- summary(model)
+print(summary_model)
+```
+
+Per comprovar la qualitat de l'ajust, s'observaran i interpretaran tres valors que atorga el _summary_ del model. El primer valor és el _Multiple R-squared_. Aquest valor és de 0.5407 (54.07%), això indica que les variables incloses en el model poden explicar fins al 54.07% de les variacions dels ingressos. El fet que aquest valor superi el 50% és indicatiu de què el model és relativament bo. Per considerar el model bo i no relativament bo, caldria que aquest valor superés el 70%.
+
+El segon valor a interpretar és el _Adjusted R-squared_. Aquest valor és una versió modificada de l'anterior que ha estat ajustat al nombre de predictors del model. Aquest valor és de 0.5372 (53.72%), per tant, el model encara pot explicar el 53.72% de les variacions dels ingressos. Vist que continua superant el 50%, es pot concloure que l'ajust continua sent relativament bo.
+
+Finalment, l'últim valor a considerar per la qualitat de l'ajust és el _Residual standard error_ (RSE). Aquest valor indica la dispersió dels punts al voltant de la línia del millor ajustament.
+
+Com el RMSE està calculat en els ingressos (variable depenent), es pot interpretar el resultat del RMSE comparant amb el valor mitjà dels ingressos.
+
+```{r}
+mean_income <- mean(markclean$Income)
+cat("Ingressos mitjans:", mean_income)
+```
+S'observa que el RMSE és bastant menor que els ingressos mitjans. En vista d'aquest fet, es conclou que el model realitza relativament bé les prediccions.
+
+### 4.1.1 Multicolinealitat
+
+```{r}
+library(car)
+```
+
+
+```{r}
+vif_vals <- vif(model)
+```
+
+```{r}
+print(vif_vals)
+```
+
+Després d'observar els resultats de la funció _vif()_ és pot observar que la multicol·linealitat del model no és un problema (no significa que no hi hagi multicol·linealitat) atès que cap valor GVIF és superior a 5. Pel que fa als resultats de la tercera columna, els valors tampoc són alarmants tot i que cal estar atent.
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
