@@ -510,10 +510,23 @@ abline(h = 0, col = "blue")
 
 Observant el gràfic de residus vs. valors ajustats, s'observa que per a valors petits valors ajustats petits, els residus s'apropen a 0 i per a valors grans els residus estan més dispersos. Aquest augmenta no constant a mesura que els valors dels ajustats creixen es coneixen com a efecte _fanning_ i indica la presència de heteroscedasticitat en els residus.
 
+# 6. Comparacions múltiples
 
+```{r}
+bonferroni <- pairwise.t.test(markclean$Income, markclean$Education,
+                              p.adjust.method = "bonferroni")
+print(bonferroni)
+```
 
+Per a fer aquest test de comparació s'estableixen les següents hipòtesis:
 
+Hipòtesi nul·la: No hi ha diferència en els ingressos mitjans quan es comparen ambdós nivells educatius.
 
+Hipòtesi alternativa: Hi ha diferència en els ingressos mitjans quan es comparen ambdós nivells educatius.
+
+Prenent com a nivell de significança 0.01 s'observa que per les comparacions: _Basic_ - _2n Cycle_, _PhD_ - _2n Cycle_, _Graduation_ - _Basic_, _Master_ - _Basic_ i _PhD_ - _Basic_ es rebutja la hipòtesi nul·la i, per tant, es conclou que sí que hi ha diferència en la comparació de sous dels nivells educatius.
+
+En les comparacions: _Graduation_ - _2n Cycle_, _Master_ - _2n Cycle_, _Master_ - _Graduation_, _PhD_ - _Graduation_ i _PhD_ - _Master_ no es rebutja la hipòtesi nul·la i, en conseqüència, es conclou que no hi ha diferència en la comparació de sous dels nivells educatius.
 
 
 
