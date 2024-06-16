@@ -425,6 +425,101 @@ probability_predict <- predict(model_log, newdata = new_data, type = "response")
 cat("Probabilitat amb predict():",probability_predict)
 ```
 
+# 5. ANOVA unifactorial
+
+## 5.1 Visualització gràfica
+
+```{r}
+install.packages("ggpubr")
+```
+
+```{r}
+library(ggpubr)
+```
+
+```{r}
+# Gràfic ordenat
+ggline(markclean, x = "Education", y = "Income",
+     add = c("mean_se", "jitter"),
+     ylab = "Income", xlab = "Education",
+     ggtheme = theme_minimal())
+```
+
+## 5.2 Hipòtesi nul·la i alternativa
+
+Hipòtesi nul·la: Els ingressos entre els diferents nivells educatius de la població estudiada no tenen diferències significatives.
+
+Hipòtesi alternativa: Els ingressos entre els diferents nivells educatius de la població estudiada sí que tenen diferències significatives.
+
+## 5.3 Model
+
+```{r}
+anova_model <- aov(Income ~ Education, data = markclean)
+summary(anova_model)
+```
+
+Per interpretar els resultats del model ANOVA, es continuarà usant un nivell de significança del 0.01. Com s'observa al _summary_ del model la variable _Education_ té un fort impacte en els ingressos de les persones a causa del fet que el valor p associat a la variable explicativa és menor al nivell de significança (0.01).
+
+## 5.4 Efectes dels nivells del factor i força de relació
+
+```{r}
+anova_components <- anova(anova_model)
+ssb <- anova_components$`Sum Sq`[1]
+sse <- sum(anova_components$`Sum Sq`[2:length(anova_components$`Sum Sq`)])
+sst <- ssb + sse
+relation_force <- ssb / sst
+cat("SSB: ",ssb,"\n")
+cat("SSE: ",sse,"\n")
+cat("SST: ",sst,"\n")
+cat("Força de relacio: ",relation_force*100,"%")
+```
+
+S'observa que al voltant del 4.65% de la variabilitat dels ingressos de la població pot ser explicada mitjançant el nivell d'educació. En altres paraules, el nivell d'educació causa un efecte petit a l'hora d'establir el sou d'una persona.
+
+## 535 Normalitat dels residus
+
+```{r}
+residuals_model <- residuals(anova_model)
+qqnorm(residuals_model)
+qqline(residuals_model)
+```
+
+En el gràfic QQ es pot observar que els residus del model ANOVA no segueixen una distribució normal atès que les dades no s'ajusten a la línia recta. Es pot observar que a la part dreta del gràfic hi ha alguns valors per sobre (bastant) de la línia igual que a l'esquerra. La part que contra major quantitat de dades, la central, es pot observar que no és una línia recta sinó que té forma de S.
+
+Per dur a terme el test shapiro es plantegen les següents hipòtesis:
+
+Hipòtesi nul·la: Els residus segueixen una distribució normal.
+
+Hipòtesi alternativa: Els residus no segueixen una distribució normal.
+
+```{r}
+shapiro.test(residuals_model)
+```
+
+Prenent un nivell de significança de 0.01, s'observa en el test de Shapiro-Wilk que el valor p està molt sota del nivell de significança. Per tant, es conclou rebutjar la hipòtesi nul·la.
+
+Un cop vist el gràfic QQ i els resultats del test Shapiro-Wilk, es conclou que els residus no segueixen una distribució normal.
+
+```{r}
+plot(fitted(anova_model), residuals_model,
+     xlab = "Ajustats",
+     ylab = "Residus",
+     main = "Gràfic residus vs ajustats")
+abline(h = 0, col = "blue")
+```
+
+Observant el gràfic de residus vs. valors ajustats, s'observa que per a valors petits valors ajustats petits, els residus s'apropen a 0 i per a valors grans els residus estan més dispersos. Aquest augmenta no constant a mesura que els valors dels ajustats creixen es coneixen com a efecte _fanning_ i indica la presència de heteroscedasticitat en els residus.
+
+
+
+
+
+
+
+
+
+
+
 
 
 
