@@ -476,7 +476,7 @@ cat("Força de relacio: ",relation_force*100,"%")
 
 S'observa que al voltant del 4.65% de la variabilitat dels ingressos de la població pot ser explicada mitjançant el nivell d'educació. En altres paraules, el nivell d'educació causa un efecte petit a l'hora d'establir el sou d'una persona.
 
-## 535 Normalitat dels residus
+## 5.5 Normalitat dels residus
 
 ```{r}
 residuals_model <- residuals(anova_model)
