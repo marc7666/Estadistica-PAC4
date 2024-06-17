@@ -458,7 +458,7 @@ anova_model <- aov(Income ~ Education, data = markclean)
 summary(anova_model)
 ```
 
-Per interpretar els resultats del model ANOVA, es continuarà usant un nivell de significança del 0.01. Com s'observa al _summary_ del model la variable _Education_ té un fort impacte en els ingressos de les persones a causa del fet que el valor p associat a la variable explicativa és menor al nivell de significança (0.01).
+Per interpretar els resultats del model ANOVA, es continuarà usant un nivell de significança del 0.01. Com s'observa al _summary_ del model la variable _Education_ té impacte en els ingressos de les persones a causa del fet que el valor p associat a la variable explicativa és menor al nivell de significança (0.01), per tant, es rebutja la hipòtesi nul·la.
 
 ## 5.4 Efectes dels nivells del factor i força de relació
 
@@ -528,14 +528,54 @@ Prenent com a nivell de significança 0.01 s'observa que per les comparacions: _
 
 En les comparacions: _Graduation_ - _2n Cycle_, _Master_ - _2n Cycle_, _Master_ - _Graduation_, _PhD_ - _Graduation_ i _PhD_ - _Master_ no es rebutja la hipòtesi nul·la i, en conseqüència, es conclou que no hi ha diferència en la comparació de sous dels nivells educatius.
 
+# 7. ANOVA multifactorial
 
+## 7.1 Anàlisi visual dels efectes principals i possibles interaccions
 
+```{r}
+data_prep <- markclean %>%
+  group_by(Education, Response) %>%
+  summarise(mean_income = mean(Income), .groups = 'drop')
+# .groups = 'drop' -> Per evitar que el dataset resultat estigui agrupat
+# .groups s'ha de posar sinó tira warning
+print(data_prep)
+```
 
+```{r}
+ggplot(data_prep, aes(x = Education, y = mean_income,
+                      color = Response, group = Response)) + 
+  geom_line() + geom_point() + theme_minimal() + 
+  labs(title = "Ingressos mitjans vs Educacio vs Response",
+       x = "Educacio", y = "Ingressos mitjans", color = "Response") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
 
+Es pot observar que entre els nivells educatius _Master_ i _PhD_ les línies són paral·leles. Aquest fet indica que no hi ha una interacció significativa entre l'educació i _Response_. Per la resta de línies (entre nivells educatius), s'observa que, o bé es creuen, o bé es creuaran si les allarguem (si allarguem les línies entre _Graduation_ i _Master_ s'acabaran creuant). El fet que les línies no siguin paral·leles, indica que, al contrari que en el cas anterior, sí que hi ha una interacció significativa.
 
+## 7.2 Càlcul del model
 
+```{r}
+anova_model_2 <- aov(Income ~ Education * Response, data = markclean)
+```
 
+## 7.3 Interpretació de resultats
 
+```{r}
+summary(anova_model_2)
+```
 
+En el _summary_ del model s'observa que, si es pren un nivell de significança de 0.01, les variables _Education_ i _Response_ tenen un efecte sobre els ingressos. És a dir, el fet que aquestes variables canvin de valor, afectarà els ingressos. Per contra, el p-value entre l'educació i la _Response_ és elevat (> 0.01), per tant, es pot concloure que l'impacte de l'educació sobre els ingressos dels individus és el mateix tant si s'ha acceptat, com si no, l'última campanya.
 
+# 8. Resum executiu
 
+Després d'analitzar ek conjunt de dades s'observa que el nivell mitjà d'ingressos de la població, de la qual s'han recollit dades, és un valor que representa bastant bé com es distribueixen els ingressos.
+
+També s'ha pogut observar i concloure amb un 99% de confiança en els resultats que les persones que no estàn en possessió d'un títol universitari ingressen, de mitjana, menys diners que aquelles persones que sí que tenen un títol universitari.
+
+Per comprendre quins factors poden explicar el nivell d'ingressos de les persones s'ha creat una eina que treballa cercant patrons (model de regressió lineal). Aquest model, ara per ara, és capaç d'explicar una mica més del 50% de les variacions dels ingressos en funció de l'any de naixement, el nombre de nens que viuen amb el client, el nombre d'adolescents que viuen amb el client, el nivell d'estudis del client, la quantitat de diners que s'ha gastat el client (en els últims dos anys) en vi, fruita, carn, peix, dolços i productes gold. També es tenen en compte el nombre de compres fetes ambdescompte, el nombre de compres festes usant el catàleg i el nombre de compres fetes a les botigues físiques. Finalment, també es té en compte el nombre de visites que el client ha fet a la web durant l'últim mes. Un cop creada aquesta eina, s'ha pogut veure que tot el que es té en compte per explicar la variació dels ingressos, realment sí que té un impacte en el nivell d'ingressos.
+
+Seguidament, s'ha creat una segona eina per a predir la probabilitat (model de regressió logística) que un client accepti l'oferta en la sisena campanya. Per calcular aquesta probabilitat, l'eina té en compte el nombre de compres efectuades amb descompte els últims 2 anys, el nombre de visites a la web l'últim mes i el acceptar, o no, alguna campanya anterior. Després de la realització de diversos càlculs s'ha pogut observar que aquesta segona eina prediu probabilitats amb una precisió del 84%. En termes numèrics, d'un total de 448 dades que es disposaven per fer proves, l'eina n'ha predit correctament al voltant de 380.
+
+Mitjançant un test anomenat ANOVA s'han comparat els ingressos per als diferents nivells educatius i s'ha pogut observar que el nivell educatiu del client té un impacte en els seus ingressos. Concretament, l'educació explica al voltant del 4.65% de la variabilitat dels ingressos.
+
+Finalment, s'ha creat una eina per avaluar l'efecte que tenen l'educació i acceptar, o no, l'última oferta sobre els ingressos i s'ha pogut observar que l'educació i acceptar, o no, l'última oferta afecta als ingressos, però que l'efecte que causa el nivell d'educació del client sobre els ingressos es similar tant si s'accepta com si no l'oferta.
