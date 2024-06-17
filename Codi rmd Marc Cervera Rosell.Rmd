@@ -579,36 +579,3 @@ Seguidament, s'ha creat una segona eina per a predir la probabilitat (model de r
 Mitjançant un test anomenat ANOVA s'han comparat els ingressos per als diferents nivells educatius i s'ha pogut observar que el nivell educatiu del client té un impacte en els seus ingressos. Concretament, l'educació explica al voltant del 4.65% de la variabilitat dels ingressos.
 
 Finalment, s'ha creat una eina per avaluar l'efecte que tenen l'educació i acceptar, o no, l'última oferta sobre els ingressos i s'ha pogut observar que l'educació i acceptar, o no, l'última oferta afecta als ingressos, però que l'efecte que causa el nivell d'educació del client sobre els ingressos es similar tant si s'accepta com si no l'oferta.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
